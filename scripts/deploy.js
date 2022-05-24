@@ -12,5 +12,5 @@ task("deploy", "Deploys the OnchainNFT.sol smart contract")
     const account = getAccount();
     const nftContractFactory = await hre.ethers.getContractFactory("OnchainNft", account);
     const nft = await nftContractFactory.deploy("0x22009fE88FD79Ec22E568751069a3A6eBc5250bd");
-    console.log(`Deployed smart contract to address: ${nft.address}`);
+    //console.log(`Deployed smart contract to address: ${nft.address}`);
 });
