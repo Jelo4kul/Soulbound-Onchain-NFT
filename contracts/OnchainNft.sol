@@ -6,9 +6,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./HelperLibrary.sol";
 
 /**
- * @dev Mint new tokens
- * @param _to Address to send the newly minted tokens
- * @param _amount The amount of tokens to send to the address
+ * @title A Soulbound Onchain NFT Contract
+ * @author Jelo
+ * @notice A soulbound NFT that can't be transferred after mint. 
+ *         It updates based on the amount of EXP tokens a user has.
+ *         If a user has more than 100 EXP tokens, it shows only 100.
  */
 contract OnchainNft is ERC721 {
 
@@ -20,15 +22,15 @@ contract OnchainNft is ERC721 {
     uint256[4] private levels = [25, 50, 75, 100];
     string[4] private  level_colors = ["#FFEC02", "#F6CE94", "#DEDDE3", "#8F1A44"];
 
+    //  -- Modifiers --
     modifier onlyOwner() {
         require(msg.sender == owner);
         _;
     }
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev Sets the address of Ethernaut's ERC20 token during deployment
+     * @param _expErc20 Address of the ERC20 token
     */
     constructor(IERC20 _expErc20) ERC721("Ethernaut Experience Point", "EthernautEXP") {
         expErc20 = _expErc20;
@@ -37,8 +39,6 @@ contract OnchainNft is ERC721 {
 
     /**
      * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
     */
     function mintExp() public returns(uint256) {
         require(balanceOf(msg.sender) == 0, "Can't mint more than 1 token");
@@ -49,9 +49,9 @@ contract OnchainNft is ERC721 {
     }
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev Returns the tokenURI of a given tokenID
+     * @param _tokenId An NFT's token ID
+     * @return Returns a string that contains the tokenURI
     */
     function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
         require(_exists(_tokenId), "ERC721Metadata: URI query for nonexistent token");
@@ -64,9 +64,9 @@ contract OnchainNft is ERC721 {
     }
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev A function that generates a base64 encoded version of an image
+     * @param _tokenId The token Id of the NFT
+     * @return Returns a string that contains the base64 encoding of a given image
     */
     function generateBase64Image(uint256 _tokenId) private view returns (string memory) {
         return HelperLibrary.encode(bytes(string(abi.encodePacked(
@@ -93,9 +93,9 @@ contract OnchainNft is ERC721 {
     } 
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev The number of EXP tokens to display on tue NFT
+     * @param _tokenId The token Id of the NFT
+     * @return Returns the number to be displayed
     */
     function numberToDisplay(uint256 _tokenId) private view returns (uint256) {
         uint256 balance = userBalance(_tokenId);
@@ -103,18 +103,18 @@ contract OnchainNft is ERC721 {
     }
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev Gets the EXP balance of a given user.
+     * @param _tokenId The token Id of the user's NFT that will be used to get the user's address.
+     * @return _balance The user's balance.
     */
     function userBalance(uint256 _tokenId) private view returns (uint _balance) {
         _balance = expErc20.balanceOf(ownerOf(_tokenId))/(10**18);
     }
 
     /**
-     * @dev Mint new tokens
-     * @param _to Address to send the newly minted tokens
-     * @param _amount The amount of tokens to send to the address
+     * @dev Get the corresponding level of a user, given the user's EXP balance
+     * @param _balance The user's EXP balance
+     * @return Returns The the user's level
     */
     function getLevel(uint _balance) private view returns(uint256) {
         for(uint i = 0; i < levels.length; i++) {
