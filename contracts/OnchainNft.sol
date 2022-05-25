@@ -39,12 +39,21 @@ contract OnchainNft is ERC721 {
 
     /**
      * @dev Mint new tokens
+     * @return Returns the tokenID
     */
     function mintExp() public returns(uint256) {
+        //ensures a user can't mint more than one token
         require(balanceOf(msg.sender) == 0, "Can't mint more than 1 token");
+        
+        //increment the tokenID
         currentTokenId += 1;
+
+        //mint a single token to the user's address
         _safeMint(msg.sender, currentTokenId);
+
+        //disable the transfer of the token
         _disableTransfer(msg.sender);
+
         return currentTokenId;
     }
 
@@ -59,7 +68,16 @@ contract OnchainNft is ERC721 {
         string memory description = "Ethernaut NFT is an onchain NFT that updates based on the amount of EXP token a wallet address owns";
         string memory image = generateBase64Image(_tokenId);
         return string(
-            abi.encodePacked("data:application/json;base64,", HelperLibrary.encode(bytes(abi.encodePacked('{"name":"', name, '", ',  '"description":"', description, '", ', '"image":"', "data:image/svg+xml;base64,", image, '"}'))))
+            abi.encodePacked(
+                "data:application/json;base64,", 
+                HelperLibrary.encode(
+                    bytes(abi.encodePacked(
+                        '{"name":"', 
+                        name, 
+                        '", ',  '"description":"', 
+                        description, 
+                        '", ', '"image":"', "data:image/svg+xml;base64,", 
+                        image, '"}'))))
         );
     }
 
@@ -99,6 +117,10 @@ contract OnchainNft is ERC721 {
     */
     function numberToDisplay(uint256 _tokenId) private view returns (uint256) {
         uint256 balance = userBalance(_tokenId);
+
+        //if the balance of the user is zero, return 0
+        //if the balance of the user is gretater than 100, return 100
+        //else retun the balance
         return balance == 0 ? 0 : balance > 100 ? 100 : balance;
     }
 
